@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>PlateMate - Find Restaurants</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <title>PlateMate - Top Picks</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="restaurants.js"></script>
+  <script>
+    // Your Firebase configuration here
+    const firebaseConfig = {
+    apiKey: "{{ firebase_api_key }}",
+    authDomain: "platemate-385014.firebaseapp.com",
+    projectId: "platemate-385014",
+    storageBucket: "platemate-385014.appspot.com",
+    messagingSenderId: "{{ firebase_sender_id }}",
+    appId: "{{ firebase_app_id }}"
+    };
+
+    // Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+  function updateNavbar() {
+  const loggedInLinks = document.getElementById('loggedInLinks');
+  const loggedOutLinks = document.getElementById('loggedOutLinks');
+
+  if (auth.currentUser) {
+    loggedInLinks.style.display = 'block';
+    loggedOutLinks.style.display = 'none';
+  } else {
+    loggedInLinks.style.display = 'none';
+    loggedOutLinks.style.display = 'block';
+  }
+}
+
+auth.onAuthStateChanged((user) => {
+  updateNavbar();
+
+});
+function handleLogout() {
+    auth.signOut().then(() => {
+        window.location.href = "{{ url_for('home') }}";
+    });
+}
+  </script>
+</head>
+<body>
+{% include 'navbar.html' %}
+
+    <div class="container">
+        <h1>Find Restaurants</h1>
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="Search for a restaurant...">
+</div>
+        <div class="restaurant-list">
+            <!-- Restaurants will be displayed here -->
+        </div>
+    </div>
+<div id="map" style="height: 600px; width: 100%;"></div>
+    <script>
+      let allRestaurants = [];
+
+      window.addEventListener("DOMContentLoaded", async () => {
+        const response = await fetch("london_TA_data.csv");
+        const csvData = await response.text();
+        Papa.parse(csvData, {
+          header: true,
+          complete(results) {
+            allRestaurants = results.data;
+            setupAutocomplete();
+          },
+        });
+      });
+
+function setupAutocomplete() {
+  const input = document.getElementById("searchInput");
+  
+  // Set bounds for London
+  const defaultBounds = new google.maps.LatLngBounds(
+    new google.maps.LatLng(51.2868, -0.5104),
+    new google.maps.LatLng(51.6919, 0.3340)
+  );
+
+  const options = {
+    bounds: defaultBounds,
+    types: ["establishment"],
+  };
+
+
+
+  const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+  fields: ["place_id", "name", "geometry", "rating", "reviews", "photos"],
+  types: ["establishment"],
+  componentRestrictions: { country: "uk" },
+
+});
+
+
+  // Create the map and set the center and zoom level
+  const map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 51.5074, lng: -0.1278 },
+    zoom: 12,
+  });
+
+  // Create a marker and infowindow
+  const marker = new google.maps.Marker({
+    map: map,
+  });
+
+  const infowindow = new google.maps.InfoWindow();
+
+autocomplete.addListener("place_changed", () => {
+  const place = autocomplete.getPlace();
+
+  if (!place.geometry) {
+    console.log("No details available for input: '" + place.name + "'");
+    return;
+  }
+
+  map.setCenter(place.geometry.location);
+  map.setZoom(15);
+
+  const marker = new google.maps.Marker({
+    map: map,
+    position: place.geometry.location,
+    title: place.name,
+  });
+
+const contentString = `
+  <div class="info-box">
+    <h4>${place.name}</h4>
+    <p>Rating: ${place.rating}</p>
+    
+    <div class="review-container">
+      <p class="review-text">${place.reviews ? place.reviews[0].text : 'No reviews available'}</p>
+      <button class="show-more">Show More</button>
+    </div>
+  
+    <div class="images-container">
+      ${place.photos ? place.photos.slice(0, 3).map(photo => `<img src="${photo.getUrl({maxWidth: 125, maxHeight: 125})}" alt="${place.name} photo" />`).join('') : 'No images available'}
+    </div>
+  </div>
+`;
+
+
+  const infowindow = new google.maps.InfoWindow({
+    content: contentString,
+  });
+
+  marker.addListener("click", () => {
+    infowindow.open(map, marker);
+  });
+marker.addListener("click", () => {
+  infowindow.open(map, marker);
+});
+
+infowindow.addListener('domready', () => {
+  const showMoreButton = document.querySelector('.show-more');
+  const reviewText = document.querySelector('.review-text');
+
+  showMoreButton.addEventListener('click', () => {
+    if (showMoreButton.textContent === 'Show More') {
+      reviewText.style.maxHeight = 'none';
+      showMoreButton.textContent = 'Show Less';
+    } else {
+      reviewText.style.maxHeight = '50px';
+      showMoreButton.textContent = 'Show More';
+    }
+  });
+});
+
+// Open the infowindow immediately
+infowindow.open(map, marker);
+
+  // Open the infowindow immediately
+  infowindow.open(map, marker);
+
+  
+});
+
+}
+
+
+
+      async function searchRestaurants() {
+        const searchQuery = document.getElementById("searchInput").value;
+        const matchingRestaurants = allRestaurants.filter(restaurant =>
+          restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+      const londonRestaurants = [];
+
+        for (const restaurant of matchingRestaurants) {
+          const isInLondon = await isRestaurantInLondon(restaurant.name);
+          if (isInLondon) {
+            londonRestaurants.push(restaurant);
+          }
+        }
+
+        displayRestaurants(londonRestaurants);
+      }
+
+      function displayRestaurants(restaurants) {
+        const restaurantList = document.querySelector(".restaurant-list");
+        restaurantList.innerHTML = "";
+
+        for (const restaurant of restaurants) {
+          const restaurantDiv = `
+            <div class="restaurant">
+              <div class="name">${restaurant.name}</div>
+              <div class="address">Address not available</div>
+              <div class="rating">
+                <i class="fa fa-star"></i>
+                Rating: ${restaurant.rating}
+              </div>
+              <div class="cuisine">Cuisine: ${restaurant.cuisine}</div>
+              <div class="price">Price: ${restaurant.price}</div>
+            </div>
+          `;
+
+          restaurantList.innerHTML += restaurantDiv;
+        }
+      }
+
+      async function isRestaurantInLondon(name) {
+        const map = new google.maps.Map(document.createElement("div"));
+        const service = new google.maps.places.PlacesService(map);
+        const request = {
+          query: name,
+          fields: ["name", "geometry"],
+        };
+
+        return new Promise((resolve) => {
+          service.findPlaceFromQuery(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+              const lat = results[0].geometry.location.lat();
+              const lng = results[0].geometry.location.lng();
+
+              // Check if the latitude and longitude are within London
+              const isInLondon = (lat >= 51.2868 && lat <= 51.6919) && (lng >= -0.5104 && lng <= 0.3340);
+              resolve(isInLondon);
+            } else {
+              resolve(false);
+            }
+          });
+        });
+      }
+
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 51.5074, lng: -0.1278 },
+          zoom: 12,
+        });
+
+        const service = new google.maps.places.PlacesService(map);
+        allRestaurants.forEach((restaurant) => {
+          const request = {
+            query: `${restaurant.name}`,
+            fields: ["name", "geometry"],
+          };
+
+          service.findPlaceFromQuery(request, (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+              const marker = new google.maps.Marker({
+                map,
+                position: results[0].geometry.location,
+                title: restaurant.name,
+              });
+
+              const infowindow = new google.maps.InfoWindow({
+                content: `
+                  <div>
+                    <h4>${restaurant.name}</h4>
+                    <p>${restaurant.address}</p>
+                    <p>Rating: ${restaurant.rating}</p>
+                    <p>Cuisine: ${restaurant.cuisine}</p>
+                    <p>Price: ${restaurant.price}</p>
+                  </div>
+                `,
+              });
+
+              marker.addListener("click", () => {
+                infowindow.open(map, marker);
+              });
+            }
+          });
+        });
+      }
+
+function initialize() {
+  initMap();
+  setupAutocomplete();
+}
+const showMoreBtn = document.querySelector('.show-more');
+
+showMoreBtn.addEventListener('click', function() {
+  this.classList.add('clicked');
+});
+
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ firebase_api_key }}&libraries=places&callback=initialize"></script>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

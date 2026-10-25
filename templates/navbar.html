@@ -1,0 +1,22 @@
+<nav class="nav">
+  <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='logo-no-background.png') }}" alt="PlateMate Logo" width="300" height="70"></a>
+  <a href="{{ url_for('find_restaurants') }}">Find Restaurants</a>
+  <a href="{{ url_for('top_picks') }}">Top Picks</a>
+  <div id="loggedInLinks" style="display:none">
+    <a href="{{ url_for('my_profile') }}">My Profile</a>
+    <a id="logout-link" href="#" onclick="handleLogout();">Logout</a>
+  </div>
+
+  <div id="loggedOutLinks">
+    <a id="login-link" href="{{ url_for('login') }}">Login</a>
+    <a id="register-link" href="{{ url_for('register') }}">Register</a>
+  </div>
+  <button id="darkModeToggle" class="dark-mode-toggle">
+  <i class="fas fa-moon"></i>
+  </button>
+</nav>
+
+
+
+
+

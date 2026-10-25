@@ -1,0 +1,131 @@
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <title>PlateMate - Register</title>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { getAuth, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+    import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
+
+    // Your Firebase configuration here
+     const firebaseConfig = {
+    apiKey: "{{ firebase_api_key }}",
+    authDomain: "platemate-385014.firebaseapp.com",
+    projectId: "platemate-385014",
+    storageBucket: "platemate-385014.appspot.com",
+    messagingSenderId: "{{ firebase_sender_id }}",
+    appId: "{{ firebase_app_id }}"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (password !== confirmPassword) {
+          alert("Passwords do not match.");
+          return;
+        }
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          console.log('User registered:', userCredential.user);
+
+          // Save user details in Firestore
+          const firstName = document.getElementById('first_name').value;
+          const lastName = document.getElementById('last_name').value;
+          const username = document.getElementById('username').value;
+
+          await setDoc(doc(db, 'users', userCredential.user.uid), {
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            username: username,
+          });
+
+          console.log("User document created in Firestore");
+
+          // Redirect to desired page after successful registration
+          window.location.href = "{{ url_for('my_profile') }}";
+        } catch (error) {
+          // Show error message to the user
+          alert(error.message);
+        }
+      });
+    });
+
+  </script>
+</head>
+<body>
+{% include 'navbar.html' %}
+
+<div class="container">
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">{{ "Register" }}</div>
+        <div class="card-body">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <div class="alert alert-danger" role="alert">
+                <ul class="mb-0">
+                  {% for message in messages %}
+                    <li>{{ message }}</li>
+                                    {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          {% endwith %}
+          <form id="register-form" action="{{ url_for('register') }}" method="post">
+            <div class="form-group">
+              <label for="first_name">{{ "First Name" }}</label>
+              <input type="text" id="first_name" name="first_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="last_name">{{ "Last Name" }}</label>
+              <input type="text" id="last_name" name="last_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="username">Username:</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+              <label for="password">{{ "Password" }}</label>
+              <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="confirm_password">{{ "Confirm Password" }}</label>
+              <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ "Register" }}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>PlateMate - Delete Profile</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+{% include 'navbar.html' %}
+<div class="container">
+    <h1 class="text-center">Delete Account</h1>
+    <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+    <form id="reauthenticate-form">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" class="form-control" id="password" required>
+        </div>
+        <button type="submit" class="btn btn-danger">Delete Account</button>
+        <a href="{{ url_for('my_profile') }}" class="btn btn-primary">Cancel</a>
+    </form>
+</div>
+<footer class="footer">
+    <div class="container">
+        <p>&copy; PlateMate 2023</p>
+    </div>
+</footer>
+<script>
+    const firebaseConfig = {
+      apiKey: "{{ firebase_api_key }}",
+      authDomain: "platemate-385014.firebaseapp.com",
+      projectId: "platemate-385014",
+      storageBucket: "platemate-385014.appspot.com",
+      messagingSenderId: "{{ firebase_sender_id }}",
+      appId: "{{ firebase_app_id }}"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore(app);
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            updateNavbar();
+        } else {
+            window.location.href = "{{ url_for('home') }}";
+        }
+    });
+
+    function updateNavbar() {
+            const loggedOutLinks = document.getElementById('loggedOutLinks');
+
+    if (auth.currentUser) {
+        loggedInLinks.style.display = 'block';
+        loggedOutLinks.style.display = 'none';
+    } else {
+        loggedInLinks.style.display = 'none';
+        loggedOutLinks.style.display = 'block';
+    }
+}
+
+document.getElementById("reauthenticate-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const user = auth.currentUser;
+
+    if (!user) {
+        window.location.href = "{{ url_for('home') }}";
+        return;
+    }
+function handleLogout() {
+    auth.signOut().then(() => {
+        window.location.href = "{{ url_for('home') }}";
+    });
+}
+    const credential = firebase.auth.EmailAuthProvider.credential(email, password);
+    user.reauthenticateWithCredential(credential)
+        .then(() => {
+            // Delete user data from Firestore
+            db.collection("users").doc(user.uid).delete()
+                .then(() => {
+                    console.log("User data deleted from Firestore.");
+                })
+                .catch((error) => {
+                    console.error("Error deleting user data:", error);
+                });
+
+            // Delete user's authentication data
+            user.delete()
+                .then(() => {
+                    console.log("User account deleted.");
+                    window.location.href = "{{ url_for('home') }}";
+                })
+                .catch((error) => {
+                    console.error("Error deleting user account:", error);
+                });
+        })
+        .catch((error) => {
+            console.error("Error re-authenticating user:", error);
+            alert("Failed to re-authenticate. Please check your email and password and try again.");
+        });
+});
+</script>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
+       

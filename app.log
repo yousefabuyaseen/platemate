@@ -1,0 +1,35 @@
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8767
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:43] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "[33mGET /restaurants.js HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET /static/styles.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET /static/logo-no-background.png HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET /static/main.js HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET /static/top-picks.jpg HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET /static/find-restaurants.jpg HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "GET /static/my-profile.jpg HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:53] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:57] "GET /find_restaurants HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:57] "[36mGET /static/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:57] "[33mGET /restaurants.js HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:57] "[36mGET /static/logo-no-background.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:57] "[36mGET /static/main.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:21:57] "[33mGET /london_TA_data.csv HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:02] "GET /top_picks HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:02] "[36mGET /static/logo-no-background.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:02] "[36mGET /static/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:02] "[36mGET /static/main.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:06] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:06] "[36mGET /static/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:06] "[36mGET /static/logo-no-background.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:06] "[36mGET /static/main.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:10] "GET /top_picks HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:10] "[36mGET /static/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:10] "[36mGET /static/logo-no-background.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:10] "[36mGET /static/main.js HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:12] "POST /top_picks HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:12] "[36mGET /static/logo-no-background.png HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:12] "[36mGET /static/styles.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [25/Oct/2026 21:22:12] "[36mGET /static/main.js HTTP/1.1[0m" 304 -
